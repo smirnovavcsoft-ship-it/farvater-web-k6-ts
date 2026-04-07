@@ -4,19 +4,20 @@ import http from 'k6/http';
 import { check /*fail*/ } from 'k6';
 import { Config } from '../config';
 import { DataFactory } from '../generators/data-factory';
+import { BaseApiService } from './base-api-services';
 
-export class IncomeDocumentService {
-    private baseUrl: string;
-    private token: string;
 
-    constructor(token: string) {
-        this.baseUrl = Config.playwright.apiBaseUrl;
-        this.token = token;
+export class IncomeDocumentService extends BaseApiService {
+    
+
+    constructor(token: string)
+    {        
+        super(token);
     }
 
     private getHeaders() {
         return {
-            'Authorization': `Bearer ${this.token}`,
+            'Authorization': `Bearer ${this._accessToken}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         };

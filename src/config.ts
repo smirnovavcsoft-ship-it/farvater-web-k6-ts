@@ -1,5 +1,5 @@
 export const Config = {
-    playwright: {
+    env: {
         baseUrl: "https://farvater.mcad.dev/farvater/",
         apiBaseUrl: "https://farvater.mcad.dev/",
     },

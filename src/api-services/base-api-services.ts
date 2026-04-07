@@ -1,18 +1,25 @@
 import http from 'k6/http';
-import { ConfigurationReader } from '../configuration/configuration-reader';
+//import { ConfigurationReader } from '../configuration/configuration-reader';
+import { Config } from '../config';
 
 export class BaseApiService {
     protected _accessToken: string | null = null;
+    protected baseUrl: string;
+
+    constructor(token: string | null = null) {
+        this.baseUrl = Config.env.apiBaseUrl;
+        this._accessToken = token;
+    }
 
     /**
      * Логика авторизации аналогична LoginAsync в C#
      */
     public LoginAsync(): void {
-        const url = `${ConfigurationReader.ApiBaseUrl}token?authType=TDMS`;
+        const url = `${Config.env.apiBaseUrl}token?authType=TDMS`;
         
         const payload = {
-            username: ConfigurationReader.Username,
-            password: ConfigurationReader.Password,
+            username: Config.credentials.username,
+            password: Config.credentials.password,
             grant_type: "password",
             client_id: "Web",
             authType: "TDMS"
