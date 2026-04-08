@@ -64,6 +64,11 @@ export class IncomeDocumentService extends BaseApiService {
         return body.handle;
     }
 
+    /*prepareAndCreateIncomeDocument (senderHandle: string)
+    {
+        var res = 
+    }*/
+
     /**
      * Удаление документа (аналог DeleteIncomeDocumentAsync)
      */
