@@ -14,7 +14,7 @@ export class BaseApiService {
     /**
      * Логика авторизации аналогична LoginAsync в C#
      */
-    public LoginAsync(): string {
+    public login(): string {
         const url = `${Config.env.apiBaseUrl}token?authType=TDMS`;
         
         const payload = {

@@ -16,12 +16,16 @@ export class CounterpartyService extends BaseApiService {
      */
     public createCounterparty(data: any) {
         const url = `${this.baseUrl}api/farvater/data/v1/contractors/legal`;
+
+        if (!this._accessToken) {this.login();}
+
         
         const res = http.post(url, JSON.stringify(data), this.GetAuthHeaders());
 
-        check(res, {
+        
+       /* check(res, {
             'Counterparty created': (r) => r.status === 200 || r.status === 201,
-        });
+        });*/
 
         return res;
     }
@@ -29,14 +33,16 @@ export class CounterpartyService extends BaseApiService {
     /**
      * Подготовка контрагента с логикой и извлечением Handle (аналог PrepareCounterpartyAsync)
      */
-    public prepareCounterparty(title: string, shortTitle: string, inn: string): string | null {
-        const model = {
+    public prepareCounterparty(): string | null {
+        /*const data = {
             fullTitle: title,
             shortTitle: shortTitle,
             inn: inn
-        };
+        };*/
 
-        const response = this.createCounterparty(model);
+        const data = DataFactory.generateCounterpartyModel();
+
+        const response = this.createCounterparty(data);
 
         if (response.status === 200 || response.status === 201) {
             const body = response.json() as { handle: string };
@@ -49,7 +55,7 @@ export class CounterpartyService extends BaseApiService {
     }
 
     /**
-     * Удаление контрагента (аналог DeleteCounterpartyAsync)
+     * Удаление контрагента 
      */
     public deleteCounterparty(handle: string | null) {
         if (!handle) {

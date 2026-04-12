@@ -24,7 +24,7 @@ export default function () {
     console.log(`[VU ${__VU}] Попытка входа...`);
 
     // 2. Вызываем логику авторизации, которую мы перенесли из C#
-    apiService.LoginAsync();
+    apiService.login();
 
     // 3. Имитируем паузу (think time), как будто админ что-то читает на экране
     sleep(1); 
