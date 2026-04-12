@@ -15,25 +15,27 @@ export class IncomeDocumentService extends BaseApiService {
         super(token);
     }
 
-    private getHeaders() {
+    /*private getHeaders() {
         return {
             'Authorization': `Bearer ${this._accessToken}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         };
-    }
+    }*/
 
     /**
      * Получение sysId типа документа (аналог GetDocumentTypeModel)
      */
-    getDocumentTypeSysId(documentType: string): string | null {
-        const url = `${this.baseUrl}api/farvater/data/v1/classifiers/ROOTNODE_ORD_DOCUMENTTYPE/children`;
-        const res = http.get(url, { headers: this.getHeaders() });
+    public getDocumentTypeSysId(documentType: string): string | null {
+        
+         if (!this._accessToken) {this.login();}
+         const url = `${this.baseUrl}api/farvater/data/v1/classifiers/ROOTNODE_ORD_DOCUMENTTYPE/children`;
+        const res = http.get(url, this.getAuthHeaders());
 
-        if (res.status !== 200) {
+        /*if (res.status !== 200) {
             console.error(`[API] Ошибка получения типов документов: ${res.status}`);
             return null;
-        }
+        }*/
 
         const items = res.json() as any[];
         const element = items.find(i => i.description === documentType || i.sysId === documentType);
@@ -44,41 +46,66 @@ export class IncomeDocumentService extends BaseApiService {
     /**
      * Создание документа (аналог CreateIncomeDocumentRequestAsync)
      */
-    createIncomeDocument(senderHandle: string) {
+    public createIncomeDocument(data: any) {
+        if (!this._accessToken) {this.login();}
         const url = `${this.baseUrl}api/farvater/data/v1/incoming`;
-        const payload = JSON.stringify(DataFactory.generateIncomeDocumentModel(senderHandle));
+        const payload = JSON.stringify(data);
 
-        const res = http.post(url, payload, { headers: this.getHeaders() });
+        return http.post(url, payload, this.getAuthHeaders());
 
-        check(res, {
+        /*check(response, {
+            'Income document created': (r) => r.status === 200 || r.status === 201,
+        });*/
+
+        /*if (res.status !== 200 && res.status !== 201) {
+            console.error(`[API] Ошибка создания документа: ${res.status}. Body: ${res.body}`);
+            return null;
+        }*/
+
+       /* const body = res.json() as { handle: string };
+        console.info(`[API] Входящий документ создан. Handle: ${body.handle}`);
+        return body.handle;*/
+    }
+
+    public prepareIncomeDocument(senderHandle: string) {
+        //if (!this._accessToken) {this.login();}
+        //const url = `${this.baseUrl}api/farvater/data/v1/incoming`;
+        //const payload = JSON.stringify(DataFactory.generateIncomeDocumentModel(senderHandle));
+
+        
+
+        
+
+        const data = DataFactory.generateIncomeDocumentModel(senderHandle);
+        const response = this.createIncomeDocument(data);
+
+        check(response, {
             'Income document created': (r) => r.status === 200 || r.status === 201,
         });
 
-        if (res.status !== 200 && res.status !== 201) {
-            console.error(`[API] Ошибка создания документа: ${res.status}. Body: ${res.body}`);
+        if (response.status !== 200 && response.status !== 201) {
+            console.error(`[API] Ошибка создания документа: ${response.status}. Body: ${response.body}`);
             return null;
         }
 
-        const body = res.json() as { handle: string };
+        const body = response.json() as { handle: string };
         console.info(`[API] Входящий документ создан. Handle: ${body.handle}`);
+        console.info(`[API] Status: ${response.status}`)
         return body.handle;
     }
 
-    /*prepareAndCreateIncomeDocument (senderHandle: string)
-    {
-        var res = 
-    }*/
+    
 
     /**
      * Удаление документа (аналог DeleteIncomeDocumentAsync)
      */
-    deleteIncomeDocument(handle: string) {
+    public deleteIncomeDocument(handle: string) {
         if (!handle) return;
 
         const cleanHandle = handle.replace(/[{}]/g, '');
         const url = `${this.baseUrl}api/farvater/data/v1/incoming/${cleanHandle}`;
 
-        const res = http.del(url, null, { headers: this.getHeaders() });
+        const res = http.del(url, null, this.getAuthHeaders() );
 
         console.info(`[API] Результат удаления ${cleanHandle}: ${res.status}`);
         

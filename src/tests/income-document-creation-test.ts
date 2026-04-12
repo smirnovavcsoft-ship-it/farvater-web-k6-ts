@@ -22,24 +22,26 @@ export const options: Options = {
 export default function () {
     const apiService = new BaseApiService();
     const token = apiService.login();
+    
 
     const counterpartyService = new CounterpartyService(token);
     const incomeService = new IncomeDocumentService(token);
 
+
     // Подготовка данных через фабрику
-    const uniqueId = `load-${__VU}-${__ITER}`;
-    const cpData = DataFactory.generateCounterpartyModel(); // Используем модель из фабрики
+   // const uniqueId = `load-${__VU}-${__ITER}`;
+   // const cpData = DataFactory.generateCounterpartyModel(); // Используем модель из фабрики
     
     // 1. Создаем контрагента
     const counterpartyHandle = counterpartyService.prepareCounterparty();
 
     if (counterpartyHandle) {
         // 2. Создаем документ для этого контрагента
-        const docData = DataFactory.generateIncomeDocumentModel(counterpartyHandle);
-        const docHandle = incomeService.createIncomeDocumentRequest(docData);
+      //  const docData = DataFactory.generateIncomeDocumentModel(counterpartyHandle);
+        const incomeDocumentHandle = Inc(counterpartyHandle);
         
         // 3. Проверяем, что документ создался (условие тестирования)
-        check(docHandle, {
+        check(incomeDocumentHandle, {
             'Document status is 200/201': (r) => r.status === 200 || r.status === 201,
             'Document handle exists': (r) => r.json('handle') !== null,
         });
@@ -48,6 +50,6 @@ export default function () {
         sleep(1);
 
         // 4. Очистка (необязательно, но полезно для бесконечных тестов)
-        incomeService.deleteIncomeDocument(docHandle.json('handle') as string);
+        incomeService.deleteIncomeDocument(incomeDocumentHandle.json('handle') as string);
     }
 }

@@ -14,19 +14,13 @@ export class CounterpartyService extends BaseApiService {
     /**
      * Создание контрагента (аналог CreateCounterpartyAsync)
      */
-    public createCounterparty(data: any) {
-        const url = `${this.baseUrl}api/farvater/data/v1/contractors/legal`;
+    public createCounterparty(data: any) {       
 
         if (!this._accessToken) {this.login();}
-
+        const url = `${this.baseUrl}api/farvater/data/v1/contractors/legal`;
         
-        const res = http.post(url, JSON.stringify(data), this.GetAuthHeaders());
-
-        
-       /* check(res, {
-            'Counterparty created': (r) => r.status === 200 || r.status === 201,
-        });*/
-
+        const res = http.post(url, JSON.stringify(data), this.getAuthHeaders());       
+       
         return res;
     }
 
@@ -34,12 +28,7 @@ export class CounterpartyService extends BaseApiService {
      * Подготовка контрагента с логикой и извлечением Handle (аналог PrepareCounterpartyAsync)
      */
     public prepareCounterparty(): string | null {
-        /*const data = {
-            fullTitle: title,
-            shortTitle: shortTitle,
-            inn: inn
-        };*/
-
+        
         const data = DataFactory.generateCounterpartyModel();
 
         const response = this.createCounterparty(data);
@@ -47,6 +36,7 @@ export class CounterpartyService extends BaseApiService {
         if (response.status === 200 || response.status === 201) {
             const body = response.json() as { handle: string };
             console.info(`[API] Контрагент создан. Handle: ${body.handle}`);
+            console.info(`[API] Status: ${response.status}`)
             return body.handle;
         } else {
             console.error(`[API] Ошибка создания контрагента: ${response.status}`);
@@ -66,7 +56,7 @@ export class CounterpartyService extends BaseApiService {
         const cleanHandle = handle.replace(/[{}]/g, '');
         const url = `${this.baseUrl}api/farvater/data/v1/contractors/${cleanHandle}`;
 
-        const res = http.del(url, null, this.GetAuthHeaders());
+        const res = http.del(url, null, this.getAuthHeaders());
 
         console.info(`[API] Результат удаления контрагента ${cleanHandle}: ${res.status}`);
         
@@ -90,7 +80,7 @@ export class CounterpartyService extends BaseApiService {
 
         while (attempts < maxAttempts) {
             attempts++;
-            const res = http.get(url, this.GetAuthHeaders());
+            const res = http.get(url, this.getAuthHeaders());
 
             if (res.status === 200) {
                 console.info(`[API] Контрагент ${handle} готов на попытке ${attempts}`);

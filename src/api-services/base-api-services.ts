@@ -43,7 +43,7 @@ export class BaseApiService {
     /**
      * Аналог GetAuthHeaders()
      */
-    protected GetAuthHeaders() {
+    public getAuthHeaders() {
         return {
             headers: {
                 "Authorization": `Bearer ${this._accessToken}`,
