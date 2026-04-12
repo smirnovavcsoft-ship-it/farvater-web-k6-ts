@@ -1,7 +1,58 @@
-import { faker } from '@faker-js/faker/locale/ru';
+import { fakerRU as faker } from '@faker-js/faker';
+import { IncomeDocumentModel } from '../models/income-document-model';
+import { CounterpartyModel } from '../models/counterparty-model';
 
+/**
+ * Единая фабрика данных для нагрузочных тестов Фарватер
+ */
 export class DataFactory {
     
+    /**
+     * Генерирует модель входящего документа
+     */
+    static generateIncomeDocumentModel(senderHandle: string) : IncomeDocumentModel {
+        return {
+            title: faker.lorem.sentence({ min: 3, max: 5 }),
+            content: `<p dir="ltr"><span style="white-space: pre-wrap;">${faker.lorem.paragraph()}</span></p>`,
+            documentType: {
+                sysId: "NODE_ORD_DOCUMENTTYPE_MESSAGE"
+            },
+            sender: {
+                handle: senderHandle
+            },
+            appendicesCount: 0,
+            listCount: 0,
+            sheetOfAppendicesCount: 0,
+            finishDate: "",
+            sendingDate: "",
+            senderNumber: "",
+            projects: [],
+            againTo: null,
+            executor: null,
+            inResponseTo: null,
+            signer: null
+        };
+    }
+
+    /**
+     * Генерирует модель контрагента
+     */
+    static generateCounterpartyModel() : CounterpartyModel {
+        const brandName = faker.company.name();
+
+        return {
+            inn: faker.helpers.replaceSymbols('##########'),
+            kpp: faker.helpers.replaceSymbols('#########'),
+            ogrn: faker.helpers.replaceSymbols('#############'),
+            shortTitle: brandName,
+            fullTitle: `ООО ${brandName}`,
+            address: faker.location.streetAddress({ useFullAddress: true }),
+            phone: faker.helpers.replaceSymbols('+7 (812) ###-##-##'),
+            email: faker.internet.email(),
+            type: "LEGALENTITY_DEF"
+        };
+    }
+
     /**
      * Генерирует модель пользователя
      */
@@ -25,25 +76,6 @@ export class DataFactory {
     }
 
     /**
-     * Генерирует модель контрагента
-     */
-    static generateCounterpartyModel() {
-        const brandName = faker.company.name();
-
-        return {
-            inn: faker.helpers.replaceSymbols('##########'),
-            kpp: faker.helpers.replaceSymbols('#########'),
-            ogrn: faker.helpers.replaceSymbols('#############'),
-            shortTitle: brandName,
-            fullTitle: `ООО ${brandName}`,
-            address: faker.location.streetAddress({ useFullAddress: true }),
-            phone: faker.helpers.replaceSymbols('+7 (812) ###-##-##'),
-            email: faker.internet.email(),
-            type: "LEGALENTITY_DEF"
-        };
-    }
-
-    /**
      * Генерирует модель проекта
      */
     static generateProjectModel() {
@@ -52,33 +84,6 @@ export class DataFactory {
             code: faker.helpers.replaceSymbols('PRJ-####'),
             title: projectName,
             projectsObject: projectName
-        };
-    }
-
-    /**
-     * Генерирует модель входящего документа
-     */
-    static generateIncomeDocumentModel(senderHandle: string) {
-        return {
-            title: faker.lorem.sentence(3),
-            content: `<p dir="ltr"><span style="white-space: pre-wrap;">${faker.lorem.paragraph()}</span></p>`,
-            documentType: {
-                sysId: "NODE_ORD_DOCUMENTTYPE_MESSAGE"
-            },
-            sender: {
-                handle: senderHandle
-            },
-            appendicesCount: 0,
-            listCount: 0,
-            sheetOfAppendicesCount: 0,
-            finishDate: "",
-            sendingDate: "",
-            senderNumber: "",
-            projects: [],
-            againTo: null,
-            executor: null,
-            inResponseTo: null,
-            signer: null
         };
     }
 
