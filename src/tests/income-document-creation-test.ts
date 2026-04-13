@@ -36,20 +36,20 @@ export default function () {
     const counterpartyHandle = counterpartyService.prepareCounterparty();
 
     if (counterpartyHandle) {
-        // 2. Создаем документ для этого контрагента
-      //  const docData = DataFactory.generateIncomeDocumentModel(counterpartyHandle);
-        const incomeDocumentHandle = Inc(counterpartyHandle);
+        // 1. Создаем документ. Здесь incomeDocumentHandle — это просто STRING или NULL
+        const incomeDocumentHandle = incomeService.prepareIncomeDocument(counterpartyHandle);
         
-        // 3. Проверяем, что документ создался (условие тестирования)
+        // 2. Исправленный блок проверок
         check(incomeDocumentHandle, {
-            'Document status is 200/201': (r) => r.status === 200 || r.status === 201,
-            'Document handle exists': (r) => r.json('handle') !== null,
+            'Income document handle is valid': (h) => h !== null && h !== undefined && h.length > 0,
         });
 
-        // Пауза между итерациями (имитация действий человека)
         sleep(1);
 
-        // 4. Очистка (необязательно, но полезно для бесконечных тестов)
-        incomeService.deleteIncomeDocument(incomeDocumentHandle.json('handle') as string);
+        // 3. Исправленная очистка
+        if (incomeDocumentHandle) {
+            // Передаем строку напрямую, без .json(), потому что это И ЕСТЬ handle
+            incomeService.deleteIncomeDocument(incomeDocumentHandle);
+        }
     }
 }

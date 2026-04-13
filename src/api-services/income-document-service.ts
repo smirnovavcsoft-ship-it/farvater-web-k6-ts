@@ -26,7 +26,7 @@ export class IncomeDocumentService extends BaseApiService {
     /**
      * Получение sysId типа документа (аналог GetDocumentTypeModel)
      */
-    public getDocumentTypeSysId(documentType: string): string | null {
+    getDocumentTypeSysId(documentType: string): string | null {
         
          if (!this._accessToken) {this.login();}
          const url = `${this.baseUrl}api/farvater/data/v1/classifiers/ROOTNODE_ORD_DOCUMENTTYPE/children`;
@@ -46,28 +46,20 @@ export class IncomeDocumentService extends BaseApiService {
     /**
      * Создание документа (аналог CreateIncomeDocumentRequestAsync)
      */
-    public createIncomeDocument(data: any) {
+    createIncomeDocument(data: any) {
         if (!this._accessToken) {this.login();}
         const url = `${this.baseUrl}api/farvater/data/v1/incoming`;
         const payload = JSON.stringify(data);
 
         return http.post(url, payload, this.getAuthHeaders());
 
-        /*check(response, {
-            'Income document created': (r) => r.status === 200 || r.status === 201,
-        });*/
-
-        /*if (res.status !== 200 && res.status !== 201) {
-            console.error(`[API] Ошибка создания документа: ${res.status}. Body: ${res.body}`);
-            return null;
-        }*/
-
-       /* const body = res.json() as { handle: string };
-        console.info(`[API] Входящий документ создан. Handle: ${body.handle}`);
-        return body.handle;*/
+        const res = http.post(url, JSON.stringify(data), this.getAuthHeaders());
+    
+        check(res, { 'Document creation request sent': (r) => r.status < 400 });
+        return res;
     }
 
-    public prepareIncomeDocument(senderHandle: string) {
+    prepareIncomeDocument(senderHandle: string) {
         //if (!this._accessToken) {this.login();}
         //const url = `${this.baseUrl}api/farvater/data/v1/incoming`;
         //const payload = JSON.stringify(DataFactory.generateIncomeDocumentModel(senderHandle));
