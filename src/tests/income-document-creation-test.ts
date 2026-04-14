@@ -24,8 +24,8 @@ export default function () {
     const token = apiService.login();
     
 
-    const counterpartyService = new CounterpartyService(token);
-    const incomeService = new IncomeDocumentService(token);
+    const counterparty = new CounterpartyService(token);
+    const incomeDocument = new IncomeDocumentService(token);
 
 
     // Подготовка данных через фабрику
@@ -33,11 +33,11 @@ export default function () {
    // const cpData = DataFactory.generateCounterpartyModel(); // Используем модель из фабрики
     
     // 1. Создаем контрагента
-    const counterpartyHandle = counterpartyService.prepareCounterparty();
+    const counterpartyHandle = counterparty.prepareCounterparty();
 
     if (counterpartyHandle) {
         // 1. Создаем документ. Здесь incomeDocumentHandle — это просто STRING или NULL
-        const incomeDocumentHandle = incomeService.prepareIncomeDocument(counterpartyHandle);
+        const incomeDocumentHandle = incomeDocument.prepareIncomeDocument(counterpartyHandle);
         
         // 2. Исправленный блок проверок
         check(incomeDocumentHandle, {
@@ -49,7 +49,25 @@ export default function () {
         // 3. Исправленная очистка
         if (incomeDocumentHandle) {
             // Передаем строку напрямую, без .json(), потому что это И ЕСТЬ handle
-            incomeService.deleteIncomeDocument(incomeDocumentHandle);
+            incomeDocument.deleteIncomeDocument(incomeDocumentHandle);
+        }
+
+        if (counterpartyHandle) {
+            counterparty.deleteCounterparty(counterpartyHandle);
         }
     }
+}
+
+// --- 3. Генерация отчета (выполняется в конце теста) ---
+
+export function handleSummary(data: any) {
+    console.info('Генерация HTML-отчета...');
+    
+    // Используем require прямо здесь, чтобы TypeScript/Webpack не ругались при сборке
+    // @ts-ignore
+    const { htmlReport } = require("https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js");
+    
+    return {
+        "summary.html": htmlReport(data),
+    };
 }

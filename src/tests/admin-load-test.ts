@@ -1,6 +1,7 @@
 import { sleep } from 'k6';
 import { Options } from 'k6/options';
 import { BaseApiService } from '../api-services/base-api-services';
+//import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
 
 // 1. Настройка нагрузки
 export const options: Options = {
@@ -28,4 +29,18 @@ export default function () {
 
     // 3. Имитируем паузу (think time), как будто админ что-то читает на экране
     sleep(1); 
+}
+
+// --- 3. Генерация отчета (выполняется в конце теста) ---
+
+export function handleSummary(data: any) {
+    console.info('Генерация HTML-отчета...');
+    
+    // Используем require прямо здесь, чтобы TypeScript/Webpack не ругались при сборке
+    // @ts-ignore
+    const { htmlReport } = require("https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js");
+    
+    return {
+        "summary.html": htmlReport(data),
+    };
 }
