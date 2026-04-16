@@ -3,41 +3,48 @@ import { check } from 'k6';
 import { BaseApiService } from './base-api-services';
 
 export class FileService extends BaseApiService {
-    
-    constructor(token: string) {
-        super(token);
-    }
 
-    /**
-     * Загрузка файла и прикрепление его к документу
-     * @param documentHandle - хендл документа, к которому цепляем файл
-     * @param fileData - содержимое файла (бинарное или строка)
-     */
-    uploadAttachment(documentHandle: string, fileData: any, fileName: string) {
-        // Убираем фигурные скобки из хендла, если они есть
-        const cleanHandle = documentHandle.replace(/[{}]/g, '');
+    uploadAndAttachFile(objectHandle: string, fileData: any, fileName: string) {
+        // --- ШАГ 1: Загрузка в общее хранилище ---
+        const storageUrl = `${this.baseUrl}api/farvater/data/v1/files/storage`;
         
-        // Путь может отличаться в зависимости от API Фарватера, 
-        // обычно это /incoming/{id}/attachments или специальный upload-сервис
-        const url = `${this.baseUrl}api/farvater/data/v1/incoming/${cleanHandle}/attachments`;
-
-        const data = {
-            // Формируем multipart/form-data
-            file: http.file(fileData, fileName),
-        };
-
-        const res = http.post(url, data, {
+        const storageRes = http.put(storageUrl, fileData, {
             headers: {
                 'Authorization': `Bearer ${this._accessToken}`,
-                // Content-Type указывать НЕ НУЖНО, k6 сам поставит multipart/form-data с границами
-            },
+                'Content-Type': 'application/octet-stream',
+            }
         });
 
-        check(res, {
-            'Attachment upload status is 200/201': (r) => r.status === 200 || r.status === 201,
-            'Attachment has ID': (r) => r.json('id') !== null,
+        check(storageRes, {
+            'Storage upload status 200': (r) => r.status === 200,
         });
 
-        return res;
+        // Парсим handle из первого элемента массива
+        const responseData = storageRes.json();
+        // @ts-ignore
+        const fileHandle = responseData[0].handle;
+
+        if (!fileHandle) {
+            console.error('File handle not found in response');
+            return storageRes;
+        }
+
+        // --- ШАГ 2: Привязка файла к объекту ---
+        // Используем полученный fileHandle и переданный objectHandle (документа)
+        const cleanObjHandle = objectHandle.replace(/[{}]/g, '');
+        const cleanFileHandle = fileHandle.replace(/[{}]/g, '');
+        
+        const attachUrl = `${this.baseUrl}api/farvater/data/v1/files/storage/${cleanFileHandle}/objects/${cleanObjHandle}?type=FILEDEF_SECOND`;
+
+        // Отправляем пустой PUT для связки
+        const attachRes = http.put(attachUrl, null, {
+            headers: { 'Authorization': `Bearer ${this._accessToken}` }
+        });
+
+        check(attachRes, {
+            'File linked to document': (r) => r.status === 200 || r.status === 204,
+        });
+
+        return attachRes;
     }
 }
